@@ -1,0 +1,30 @@
+services:
+  logger.channel.smartling:
+    parent: logger.channel_base
+    arguments: ['smartling']
+
+  tmgmt_smartling.utils.context.job_url:
+    class: Drupal\tmgmt_smartling\Context\TranslationJobToUrl
+    arguments: ['@entity_type.manager']
+
+  tmgmt_smartling.utils.context.current_user_auth:
+    class: Drupal\tmgmt_smartling\Context\ContextCurrentUserAuth
+    arguments: ['@current_user']
+
+  tmgmt_smartling.utils.context.user_auth:
+    class: Drupal\tmgmt_smartling\Context\ContextUserAuth
+    arguments: ['@current_user', '@entity.manager', '@module_handler', '@session_manager', '@session', '@logger.channel.smartling']
+
+  tmgmt_smartling.utils.context.html_asset_inliner:
+    class: Drupal\tmgmt_smartling\Context\HtmlAssetInliner
+    arguments: []
+
+  tmgmt_smartling.utils.context.uploader:
+    class: Drupal\tmgmt_smartling\Context\ContextUploader
+    arguments: ['@tmgmt_smartling.utils.context.job_url', '@tmgmt_smartling.utils.context.user_auth', '@tmgmt_smartling.utils.context.html_asset_inliner', '@config.factory', '@logger.channel.smartling']
+
+  tmgmt_smartling.subscriber.request_translation:
+    class: \Drupal\tmgmt_smartling\EventSubscriber\RequestTranslationSubscriber
+    arguments: ['@queue', '@tmgmt_smartling.utils.context.job_url']
+    tags:
+      - { name: 'event_subscriber' }

@@ -1,0 +1,16 @@
+name: 'Smartling Translator'
+description: 'A Smartling Translator which use Smartling Translator service.'
+package: 'Translation Management'
+# core: 8.x
+type: module
+
+dependencies:
+  - tmgmt
+  - tmgmt_file
+  - serialization
+
+# Information added by Drupal.org packaging script on 2016-10-20
+version: '8.x-1.0-rc3'
+core: '8.x'
+project: 'tmgmt_smartling'
+datestamp: 1476970441

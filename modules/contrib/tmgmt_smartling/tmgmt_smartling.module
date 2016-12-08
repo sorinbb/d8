@@ -1,0 +1,154 @@
+<?php
+
+/**
+ * @file
+ * Contains
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ViewExecutable;
+
+function tmgmt_smartling_download_file_submit(array &$form, FormStateInterface $form_state) {
+  /* @var \Drupal\tmgmt\Entity\Job $job */
+  $job = $form_state->getFormObject()->getEntity();
+  /* @var \Drupal\tmgmt_smartling\Smartling\SmartlingApi $smartlingApi */
+  tmgmt_smartling_download_file($job);
+}
+
+function tmgmt_smartling_download_file(\Drupal\tmgmt\JobInterface $job) {
+  $smartlingApi = $job->getTranslatorPlugin()->getSmartlingApi($job->getTranslator());
+  $retrieval_type = $job->getTranslator()->getSetting('retrieval_type');
+  // @todo try/catch block
+  $xml = $smartlingApi->downloadFile($job->getTranslatorPlugin()->getFileName($job), $job->getRemoteTargetLanguage(), ['retrievalType' => $retrieval_type]);
+  $path = $job->getSetting('scheme') . '://tmgmt_smartling_translations/' . $job->getTranslatorPlugin()->getFileName($job);
+  $dirname = dirname($path);
+  if (file_prepare_directory($dirname, FILE_CREATE_DIRECTORY) && ($file = file_save_data($xml, $path, FILE_EXISTS_REPLACE))) {
+    $extension = pathinfo($file->getFileUri(), PATHINFO_EXTENSION);
+    $plugin = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance($extension);
+    if ($plugin) {
+      // Validate the file on job.
+      $validated_job = $plugin->validateImport($file->getFileUri(), $job);
+      if (!$validated_job) {
+        $job->addMessage('Failed to validate file, import aborted.', array(), 'error');
+      }
+      elseif ($validated_job->id() != $job->id()) {
+        $job->addMessage('The imported file job id @file_id does not match the job id @job_id.', array(
+          '@file_id' => $validated_job->id(),
+          '@job_id' => $job->id(),
+        ), 'error');
+      }
+      else {
+        try {
+          // Validation successful, start import.
+          $job->addTranslatedData($plugin->import($file->getFileUri()));
+          $job->addMessage('Successfully imported file.');
+        } catch (Exception $e) {
+          $job->addMessage('File import failed with the following message: @message', array('@message' => $e->getMessage()), 'error');
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function tmgmt_smartling_theme() {
+  return [
+    'smartling_clean_block' => [
+      'variables' => ['org_id' => ''],
+    ],
+    'smartling_dashboard_link' => [
+      'variables' => ['proj_id' => '', 'file_name' => ''],
+    ],
+  ];
+}
+
+
+/**
+ * Implements hook_view_pre_render()
+ */
+//function tmgmt_smartling_views_post_render(Drupal\views\ViewExecutable $view, &$output, \Drupal\views\Plugin\views\cache\CachePluginBase $cache) {
+//    if ($view->id() != 'tmgmt_job_overview') {
+//        return;
+//    }
+//
+//    foreach ($view->result as &$res) {
+//        //$res['tmgmt_job_translator'] = 'wefwef';
+//    }
+////    $image_style_id = 'my_responsive_image_style';
+////
+////        $image_field = $view->field['field_news_image'];
+////        $image_field->options['type'] = 'responsive_image';
+////        $image_field->options['settings']['responsive_image_style'] = $image_style_id;
+//
+//}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function tmgmt_smartling_views_data_alter(array &$data) {
+    $data['tmgmt_job']['smartling_dashboard'] = array(
+        'title' => t('Link to Smartling Dashboard'),
+        'field' => array(
+            'title' => t('Link to Smartling Dashboard'),
+            //'help' => t('Flags a specific node type.'),
+            'id' => 'tmgmt_smartling_dashboard_link',
+        ),
+    );
+}
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function tmgmt_smartling_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
+  if ($view->id() === 'tmgmt_translation_all_job_items') {
+    $handlers = $view->getHandlers('field');
+
+    foreach ($handlers as $name => $value) {
+      $view->removeHandler($view->current_display, 'field', $name);
+    }
+
+    $view->addHandler($view->current_display, 'field', 'tmgmt_job_item', 'tmgmt_job_item_bulk_form', array(
+      'id' => 'tmgmt_job_item_bulk_form',
+      'table' => 'tmgmt_job_item',
+      'field' => 'tmgmt_job_item_bulk_form',
+      'group_type' => 'group',
+      'label' => 'Bulk update',
+      'hide_alter_empty' => 1,
+      'action_title' => 'With selection',
+      'include_exclude' => 'exclude',
+      'selected_actions' => [],
+      'entity_type' => 'tmgmt_job_item',
+      'plugin_id' => 'bulk_form',
+      'weight' => -10
+    ));
+
+    foreach ($handlers as $name => $value) {
+      $view->addHandler($view->current_display, 'field', 'tmgmt_job_item', $name, $value);
+    }
+  }
+
+
+  if ($view->id() === 'tmgmt_job_overview') {
+    $handlers = $view->getHandlers('field');
+
+    $view->removeHandler($view->current_display, 'field', 'operations');
+
+    $view->addHandler($view->current_display, 'field', 'tmgmt_job', 'smartling_dashboard', array(
+      'id' => 'smartling_dashboard',
+      'table' => 'tmgmt_job',
+      'field' => 'smartling_dashboard',
+      'group_type' => 'group',
+      'label' => 'Smartling',
+      'hide_alter_empty' => 1,
+      'selected_actions' => [],
+      'entity_type' => 'tmgmt_job',
+      'plugin_id' => 'tmgmt_smartling_dashboard_link',
+      'weight' => -10
+    ));
+
+    $view->addHandler($view->current_display, 'field', 'tmgmt_job_item', 'operations', $handlers['operations']);
+  }
+}

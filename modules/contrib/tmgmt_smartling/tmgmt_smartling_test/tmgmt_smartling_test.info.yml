@@ -1,0 +1,13 @@
+name: 'Smartling Translator Test Service Mocker'
+description: 'Provides a local implementation of the Smartling Translater API'
+package: 'Translation Management'
+# core: 8.x
+type: module
+
+hidden: true
+
+# Information added by Drupal.org packaging script on 2016-10-20
+version: '8.x-1.0-rc3'
+core: '8.x'
+project: 'tmgmt_smartling'
+datestamp: 1476970441

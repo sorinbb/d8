@@ -1,0 +1,11 @@
+name: marketo_ma_contact_test
+type: module
+# core: 8.x
+dependencies:
+  - marketo_ma_contact
+
+# Information added by Drupal.org packaging script on 2016-10-23
+version: '8.x-2.x-dev'
+core: '8.x'
+project: 'marketo_ma'
+datestamp: 1477190950

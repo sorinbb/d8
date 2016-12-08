@@ -1,0 +1,38 @@
+tmgmt.translator.settings.smartling:
+  type: tmgmt.translator_base
+  mapping:
+    api_url:
+      type: string
+      label: 'API URL'
+    project_id:
+      type: string
+      label: 'Project ID'
+    key:
+      type: string
+      label: 'Key'
+    export_format:
+      type: string
+      label: Default export format
+    auto_authorize_locales:
+      type: boolean
+      label: 'Automatically authorize content for translation in Smartling'
+    callback_url_use:
+      type: boolean
+      label: 'Use Smartling callback: /smartling/callback/%cron_key'
+    retrieval_type:
+      type: string
+      label: 'The desired format for the download'
+    allow_override:
+      type: boolean
+      label: 'Allow override translation file on smartling side'
+    scheme:
+      type: string
+      label: 'Schema to store translation files in'
+    orgID:
+      type: string
+      label: 'orgID identifier from the API page in Smartling Dashboard'
+    contextUsername:
+      type: string
+      label: 'Username for context retrieval'
+
+

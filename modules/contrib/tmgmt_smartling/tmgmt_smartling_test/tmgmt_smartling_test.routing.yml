@@ -1,0 +1,25 @@
+tmgmt_smartling_test.download_file:
+  path: 'tmgmt-smartling/v1/file/get'
+  defaults:
+    _controller: '\Drupal\tmgmt_smartling_test\Controller\SmartlingTranslatorTestController::download_file'
+  requirements:
+    _access: 'TRUE'
+tmgmt_smartling_test.locales_list:
+  path: 'tmgmt-smartling/v1/project/locale/list'
+  defaults:
+    _controller: '\Drupal\tmgmt_smartling_test\Controller\SmartlingTranslatorTestController::locales_list'
+  requirements:
+    _access: 'TRUE'
+tmgmt_smartling_test.upload_file:
+  path: 'tmgmt-smartling/v1/file/upload'
+  defaults:
+    _controller: '\Drupal\tmgmt_smartling_test\Controller\SmartlingTranslatorTestController::upload_file'
+  requirements:
+    _access: 'TRUE'
+tmgmt_smartling_test.get_status:
+  path: 'tmgmt-smartling/v1/file/status'
+  defaults:
+    _controller: '\Drupal\tmgmt_smartling_test\Controller\SmartlingTranslatorTestController::get_status'
+  requirements:
+    _access: 'TRUE'
+

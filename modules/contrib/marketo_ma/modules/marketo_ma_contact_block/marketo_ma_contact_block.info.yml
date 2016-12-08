@@ -1,0 +1,14 @@
+name: Marketo MA Contact Block
+type: module
+description: Provides a contact block with additional fields for marketo mapping.
+# core: 8.x
+package: Marketo
+dependencies:
+  - marketo_ma_contact
+  - contact_block
+
+# Information added by Drupal.org packaging script on 2016-10-23
+version: '8.x-2.x-dev'
+core: '8.x'
+project: 'marketo_ma'
+datestamp: 1477190950
